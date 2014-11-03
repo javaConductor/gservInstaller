@@ -87,6 +87,9 @@ class EnvPathUtils {
             case "tcsh":
                 line = "setenv PATH \$PATH:${dirPath.absolutePath} $lastPart"
                 break;
+            default:
+                line = "export PATH=\$PATH:${dirPath.absolutePath} $lastPart"
+                break;
         }
         "\n$line"
     }

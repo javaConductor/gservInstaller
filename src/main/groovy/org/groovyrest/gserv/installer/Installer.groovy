@@ -1,12 +1,10 @@
 package org.groovyrest.gserv.installer
 
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
+import java.nio.file.*
 
 class Installer {
     static def VERSION_FILENAME = "version.txt";
     static void main(String[] args){
-
         Installer installer = new Installer();
 
         /// get the user's home directory
@@ -37,7 +35,6 @@ class Installer {
             System.err.println("Bad installer jar.  Nothing to install!!")
             throw new InstallationException("Bad installer jar.  Nothing to install!!");
         }
-
     }
 
     def copyFile( File destDir, File sourceFile){
