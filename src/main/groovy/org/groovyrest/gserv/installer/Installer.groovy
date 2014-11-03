@@ -41,10 +41,11 @@ class Installer {
         if ( !destDir.exists()){
             Files.createDirectories(destDir.toPath())
         }
-        OutputStream os = new FileOutputStream(
-        new File ( destDir, sourceFile.name));
+        File outFile = new File ( destDir, sourceFile.name);
+        OutputStream os = new FileOutputStream(outFile);
         Files.copy(sourceFile.toPath(), os )
         os.close();
+        outFile
     }
 
     def install(File gservHome){
@@ -61,8 +62,8 @@ class Installer {
         /// 2. Create gserv script in ~/.gserv/gserv
         ///  chmod the script to X for all
         File gservScript = getScriptFile();
-        copyFile( dirScripts, gservScript)
-
+        File f = copyFile( dirScripts, gservScript)
+        f.setExecutable(true, false)
         /// 2b. Add a file version.txt with the Version/license info for gServ
         File gservVersion = getVersionFile();
         copyFile( gservHome, gservVersion)
