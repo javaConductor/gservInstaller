@@ -66,8 +66,9 @@ class Installer {
         ///  chmod the script to X for all
         File gservScript = getScriptFile();
         File f = copyFile( dirScripts, gservScript)
-        f.renameTo(new File(dirScripts,"gserv"))
-        f.setExecutable(true, false)
+        File newFile = new File(dirScripts,"gserv")
+        f.renameTo(newFile)
+        newFile.setExecutable(true, false)
 
         /// 2b. Add a file version.txt with the Version/license info for gServ
         File gservVersion = getVersionFile();
