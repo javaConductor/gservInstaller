@@ -23,6 +23,7 @@ class Installer {
         installer.install(gservHome);
     }
 
+    EnvPathUtils envPathUtils
     def Installer(){
         /// PRE- CONDITION: org.groovyrest.gserv.installer.Installer MUST have 3 things on its classpath:
         //// gserv.jar
@@ -35,6 +36,7 @@ class Installer {
             System.err.println("Bad installer jar.  Nothing to install!!")
             throw new InstallationException("Bad installer jar.  Nothing to install!!");
         }
+
     }
 
     def copyFile( File destDir, File sourceFile){
@@ -49,6 +51,7 @@ class Installer {
     }
 
     def install(File gservHome){
+        envPathUtils = new EnvPathUtils(gservHome)
         // destination dirs
         File dirBin = new File(gservHome, "bin")
         File dirScripts = new File(gservHome, "scripts")
@@ -64,13 +67,14 @@ class Installer {
         File gservScript = getScriptFile();
         File f = copyFile( dirScripts, gservScript)
         f.setExecutable(true, false)
+
         /// 2b. Add a file version.txt with the Version/license info for gServ
         File gservVersion = getVersionFile();
         copyFile( gservHome, gservVersion)
 
         ///3. Add gserv to the PATH
         /// /// add the ~/.gserv/scripts to the PATH in its own line (append)
-        EnvPathUtils.addScriptDirToPath(dirScripts)
+        envPathUtils.addScriptDirToPath(dirScripts)
 
         ///5. report what version was installed and where
         /// What Version - get it from the version.txt in the installer jar
@@ -83,6 +87,8 @@ class Installer {
         ///6. invite user to run the new gserv command
         println "To test installation: type 'gserv' at prompt."
     }
+
+
 
     File resourceAsFile(name){
         def url = ClassLoader.getSystemResource(name)
