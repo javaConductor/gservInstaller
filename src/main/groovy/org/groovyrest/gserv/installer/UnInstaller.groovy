@@ -8,9 +8,9 @@ import java.nio.file.Files
  * Created by lcollins on 10/31/2014.
  */
 class UnInstaller {
-
+def envPathUtils
     def unInstall(File gservHome, String version) {
-
+        envPathUtils = new EnvPathUtils(gservHome)
         switch (version) {
             case "1.0.0":
                 break;
@@ -32,7 +32,7 @@ class UnInstaller {
         //TODO don't forget to (when possible)  preserve the Plugin folder
         //TODO check the version for special unInstall needs
         FileUtils.deleteDirectory(gservHome);
-        EnvPathUtils.removeScriptDirFromPath()
+        envPathUtils.removeScriptDirFromPath()
     }
 
 }

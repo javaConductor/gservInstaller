@@ -4,14 +4,20 @@ package org.groovyrest.gserv.installer
  */
 class EnvPathUtils {
 
-    static def lastPart = "#gserv - DO NOT REMOVE - gserv"
-    static  def env = System.getenv()
 
-    static def isBash(env){
+    def lastPart = "#gserv - DO NOT REMOVE - gserv"
+    def env = System.getenv()
+    def gservHome
+
+    EnvPathUtils(File gservHome){
+        this.gservHome = gservHome
+    }
+
+    def isBash(env){
         (env?.SHELL == "bash" || env?.SHELL?.endsWith( "/bash") )
     }
 
-    static def isCsh(env){
+    def isCsh(env){
         (env?.SHELL == "csh" || env?.SHELL?.endsWith( "/csh") ) ||
         (env?.SHELL == "tcsh" || env?.SHELL?.endsWith( "/tcsh") )
     }
@@ -20,7 +26,7 @@ class EnvPathUtils {
      *
      * @return Current User home directory
      */
-    public static File homeDir() {
+    static File homeDir() {
         File userHome = new File(System.getProperty("user.home"));
         userHome
     }
@@ -30,7 +36,7 @@ class EnvPathUtils {
      * @param dirPath
      * @return
      */
-    static def  addScriptDirToPath( File dirPath){
+    def  addScriptDirToPath( File dirPath){
         def ret = []
         //// Default
         def profile = new File(homeDir(), ".profile")
@@ -60,20 +66,13 @@ class EnvPathUtils {
      * @param dirPath
      * @return
      */
-    static def addPathSettingToScript(File scriptFile, File dirPath){
-        def line = shellLineForPath(dirPath)
+    def addPathSettingToScript(File scriptFile, File dirPath){
+        def line = shellLineFromShellName(env.SHELL, dirPath)
+        def homeLine = gservHomeLineFromShellName(env.SHELL, gservHome)
         def lines = scriptFile.readLines()
+        lines << homeLine
         lines << line
         writeLinesToFile(lines, scriptFile)
-    }
-
-    /**
-     *
-     * @param dirPath
-     * @return
-     */
-    public static shellLineForPath( dirPath ) {
-        shellLineFromShellName(env.SHELL, dirPath)
     }
 
     /**
@@ -82,7 +81,7 @@ class EnvPathUtils {
      * @param dirPath
      * @return
      */
-    public static String shellLineFromShellName(String shellName, dirPath) {
+    public String shellLineFromShellName(String shellName, dirPath) {
         def line
 
         if (isBash(env)) {
@@ -110,7 +109,41 @@ class EnvPathUtils {
         "\n$line"
     }//
 
-    static def  removeScriptDirFromPath( ){
+    /**
+     *
+     * @param shellName
+     * @param dirPath
+     * @return
+     */
+    public String gservHomeLineFromShellName(shellName, gservHome) {
+        def line
+
+        if (isBash(env)) {
+            line = "export GSERV_HOME=${gservHome.absolutePath} $lastPart"
+        } else if (isCsh(env)) {
+            line = "export GSERV_HOME=${gservHome.absolutePath} $lastPart"
+        } else{
+            switch (shellName) {
+                case "bourne":
+                    line = "GSERV_HOME=${gservHome.absolutePath} $lastPart"
+                    line += "\nexport GSERV_HOME"
+                    break;
+                case "bash":
+                    line = "export GSERV_HOME=${gservHome.absolutePath} $lastPart"
+                    break;
+                case "csh":
+                case "tcsh":
+                    line = "setenv GSERV_HOME=${gservHome.absolutePath} $lastPart"
+                    break;
+                default:
+                    line = "export GSERV_HOME=${gservHome.absolutePath} $lastPart"
+                    break;
+            }
+        }
+        "\n$line"
+    }//
+
+    def  removeScriptDirFromPath( ){
         def profile = new File(homeDir(), ".profile")
         removePathSettingFromScript(profile)
         //// Shell specific
@@ -131,7 +164,7 @@ class EnvPathUtils {
      * @param scriptFile
      * @return
      */
-    static def removePathSettingFromScript(File scriptFile){
+    def removePathSettingFromScript(File scriptFile){
         if (!scriptFile.exists())
             return;
 
@@ -149,7 +182,7 @@ class EnvPathUtils {
      * @param file
      * @return The number of things written
      */
-    static def writeLinesToFile(List lines, File file){
+    def writeLinesToFile(List lines, File file){
         def fw = new FileWriter( file )
         lines.each { fw.append(it).append('\n')}
         fw.close()
