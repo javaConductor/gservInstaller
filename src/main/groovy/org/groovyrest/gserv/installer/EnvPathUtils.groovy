@@ -7,6 +7,15 @@ class EnvPathUtils {
     static def lastPart = "#gserv - DO NOT REMOVE - gserv"
     static  def env = System.getenv()
 
+    static def isBash(env){
+        (env?.SHELL == "bash" || env?.SHELL?.endsWith( "/bash") )
+    }
+
+    static def isCsh(env){
+        (env?.SHELL == "csh" || env?.SHELL?.endsWith( "/csh") ) ||
+        (env?.SHELL == "tcsh" || env?.SHELL?.endsWith( "/tcsh") )
+    }
+
     /**
      *
      * @return Current User home directory
@@ -29,12 +38,12 @@ class EnvPathUtils {
            addPathSettingToScript(profile, dirPath)
         ret << profile
         //// Shell specific
-        if (env.SHELL == "bash"){
+        if (isBash(env) ){
             def bashProfile = new File(homeDir(), ".bashrc")
             if(bashProfile.exists())
                 addPathSettingToScript(bashProfile, dirPath)
             ret << bashProfile
-        }
+        }//if
 
         if (env.SHELL == "zsh"){
             def bashProfile = new File(homeDir(), ".zshrc")
@@ -75,30 +84,37 @@ class EnvPathUtils {
      */
     public static String shellLineFromShellName(String shellName, dirPath) {
         def line
-        switch(shellName){
-            case "bourne":
-                line = "PATH=\$PATH:${dirPath.absolutePath} $lastPart"
-                line += "\nexport PATH"
-                break;
-            case "bash":
-                line = "export PATH=\$PATH:${dirPath.absolutePath} $lastPart"
-                break;
-            case "csh":
-            case "tcsh":
-                line = "setenv PATH \$PATH:${dirPath.absolutePath} $lastPart"
-                break;
-            default:
-                line = "export PATH=\$PATH:${dirPath.absolutePath} $lastPart"
-                break;
+
+        if (isBash(env)) {
+            line = "export PATH=\$PATH:${dirPath.absolutePath} $lastPart"
+        } else if (isCsh(env)) {
+            line = "export PATH=\$PATH:${dirPath.absolutePath} $lastPart"
+        } else{
+            switch (shellName) {
+                case "bourne":
+                    line = "PATH=\$PATH:${dirPath.absolutePath} $lastPart"
+                    line += "\nexport PATH"
+                    break;
+                case "bash":
+                    line = "export PATH=\$PATH:${dirPath.absolutePath} $lastPart"
+                    break;
+                case "csh":
+                case "tcsh":
+                    line = "setenv PATH \$PATH:${dirPath.absolutePath} $lastPart"
+                    break;
+                default:
+                    line = "export PATH=\$PATH:${dirPath.absolutePath} $lastPart"
+                    break;
+            }
         }
         "\n$line"
-    }
+    }//
 
     static def  removeScriptDirFromPath( ){
         def profile = new File(homeDir(), ".profile")
         removePathSettingFromScript(profile)
         //// Shell specific
-        if (env.SHELL == "bash"){
+        if (env.SHELL == "bash" || env.SHELL?.endsWith("/bash")){
             def bashProfile = new File(homeDir(), ".bashrc")
             removePathSettingFromScript(bashProfile)
         }
