@@ -2,7 +2,10 @@
 apply plugin: 'groovy'
 apply plugin: 'application'
 
+<<<<<<< HEAD
 defaultTasks 'clean', 'assemble'
+=======
+>>>>>>> deac86322b1903d1a2504f4b28dddc0ece4e2624
 sourceCompatibility = 1.5
 version = '1.0'
 mainClassName="org.groovyrest.gserv.installer.Installer"
