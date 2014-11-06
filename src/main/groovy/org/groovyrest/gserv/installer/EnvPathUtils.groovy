@@ -70,8 +70,8 @@ class EnvPathUtils {
         def line = shellLineFromShellName(env.SHELL, dirPath)
         def homeLine = gservHomeLineFromShellName(env.SHELL, gservHome)
         def lines = scriptFile.readLines()
-        lines << homeLine
-        lines << line
+        lines << homeLine.trim();
+        lines << line.trim()
         writeLinesToFile(lines, scriptFile)
     }
 
